@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Бесконечная птичка</title>
+<style>
+    body {
+        font-family: monospace;
+        white-space: pre;
+        margin: 0;
+        padding: 20px;
+        line-height: 1.2;
+        background: #f0f0f0;
+    }
+    #bird {
+        text-align: left;
+    }
+</style>
+</head>
+<body>
+
+<pre id="bird">
+ (
+  `-`-.
+  '( @ >
+   _) (
+  /    )
+ /_,'  /
+   \  /
+    ||
+</pre>
+
+<script>
+    const bird = document.getElementById("bird");
+    const tail = "    ||\n";
+    let tailsAdded = 0;
+
+    function addTail() {
+        bird.textContent += tail;
+        tailsAdded++;
+        setTimeout(addTail, 50);
+    }
+
+    addTail();
+</script>
+
+</body>
+</html>
