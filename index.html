@@ -2,44 +2,154 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Бесконечная птичка</title>
+<title>Бесконечный скролл с тайной</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-    body {
-        font-family: monospace;
-        white-space: pre;
-        margin: 0;
-        padding: 20px;
-        line-height: 1.2;
-        background: #f0f0f0;
-    }
-    #bird {
-        text-align: left;
-    }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #ffffff;
+    color: #000;
+  }
+  .intro {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    font-size: 26px;
+    opacity: 0.85;
+    padding: 0 20px;
+  }
+  .message {
+    text-align: center;
+    font-size: 26px;
+    opacity: 0.85;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 </style>
 </head>
 <body>
 
-<pre id="bird">
- (
-  `-`-.
-  '( @ >
-   _) (
-  /    )
- /_,'  /
-   \  /
-    ||
-</pre>
+<div class="intro">
+  Добро пожаловать! Листай вниз медленно и внимательно — впереди скрыта тайна, но она раскрывается постепенно.
+</div>
+
+<div id="content" style="padding-bottom: 2000px;"></div>
 
 <script>
-const bird = document.getElementById("bird");
-const tail = "    ||\n";
+const content = document.getElementById('content');
 
-function addTail() {
-    bird.textContent += tail;
-    setTimeout(addTail, 50);
+const commonTexts = [
+  'Ты почти дошёл, продолжай',
+  'Чувствуешь запах тайны?',
+  'Внизу что-то ждёт',
+  'Секрет почти раскрыт…',
+  'Скролл вниз и будет сюрприз',
+  'Ты близко…',
+  'Кажется, там что-то интересное',
+  'Листай дальше',
+  'Внизу скрыто что-то интересное',
+  'Сюрприз почти в твоих руках',
+  'Не сдавайся, листай дальше',
+  'Тайна ещё глубже',
+  'Продолжай, ты на пути к секрету',
+  'Каждый скролл приближает к разгадке',
+  'Что-то важное ждёт тебя дальше',
+  'Не останавливайся сейчас',
+  'Секрет медленно раскрывается',
+  'Листай, чтобы узнать больше',
+  'Тайна становится всё интереснее',
+  'Внимание! Секрет всё ближе'
+];
+
+const rareTexts = [
+  'Забавный факт: Люди скроллят быстрее, если есть ощущение, что «скрыто что-то интересное"',
+  'Забавный факт: Средний пользователь скроллит 50% контента на экране и дальше почти вслепую',
+  'Забавный факт: Скролл снижает восприятие времени: можно «потеряться» на странице',
+  'Забавный факт: Люди чаще листают вниз, чем читают текст полностью',
+  'Забавный факт: Скролл сам по себе — уже развлечение',
+  'Забавный факт: Скролл — это как ходьба: движение вниз успокаивает мозг',
+  'Забавный факт: Иногда пустота между блоками — это тоже контент.',
+  'Забавный факт: Люди быстрее реагируют на визуальные «подсказки», чем на текст.',
+  'Шутка: если ты видишь этот блок, ты уже в плену бесконечного скролла',
+  'Ищешь конец? Он не ищет тебя'
+];
+
+let distance = 800;
+const maxDistance = 12000;
+let currentColorValue = 255;
+let lastText = '';
+let nextMilestone = 100;
+
+function getRandomText(array) {
+  if (array.length === 0) return null;
+  let text;
+  do {
+    const idx = Math.floor(Math.random() * array.length);
+    text = array[idx];
+  } while (text === lastText && array.length > 1);
+  lastText = text;
+  return text;
 }
 
-addTail();
+function addBlock() {
+  const div = document.createElement('div');
+  div.className = 'message';
+  div.style.marginTop = distance + 'px';
+
+  let text;
+  const roll = Math.random();
+  if (roll < 0.12) {
+    text = getRandomText(rareTexts);
+  } else {
+    text = getRandomText(commonTexts);
+  }
+  if (!text) text = getRandomText(commonTexts.concat(rareTexts));
+
+  div.textContent = text;
+  content.appendChild(div);
+
+  distance = Math.min(Math.floor(distance * 1.05), maxDistance);
+  updateBackground();
+}
+
+function updateBackground() {
+  // Медленное чернение и предотвращение мерцания текста
+  const scrollPercent = Math.min(window.scrollY / (document.body.scrollHeight - window.innerHeight), 1);
+  let targetColor = Math.floor(255 - scrollPercent * 250); // постепенно к 0
+  if (targetColor < 0) targetColor = 0;
+  // фон всегда уменьшается, никогда не увеличивается
+  if (targetColor < currentColorValue) currentColorValue = targetColor;
+  document.body.style.background = `rgb(${currentColorValue}, ${currentColorValue}, ${currentColorValue})`;
+  document.body.style.color = currentColorValue < 50 ? '#fff' : '#000';
+}
+
+function checkMilestone() {
+  const scrolledPages = Math.floor(window.scrollY / window.innerHeight);
+  while (scrolledPages >= nextMilestone) {
+    const milestoneDiv = document.createElement('div');
+    milestoneDiv.className = 'message';
+    milestoneDiv.style.marginTop = distance + 'px';
+    milestoneDiv.textContent = `Ты уже проскроллил больше ${nextMilestone} страниц.`;
+    content.appendChild(milestoneDiv);
+
+    distance = Math.min(Math.floor(distance * 1.05), maxDistance);
+    nextMilestone += 100;
+  }
+}
+
+for (let i = 0; i < 5; i++) addBlock();
+
+window.addEventListener('scroll', () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+    for (let i = 0; i < 3; i++) addBlock();
+  }
+  updateBackground();
+  checkMilestone();
+});
 </script>
 
 </body>
